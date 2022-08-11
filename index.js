@@ -9,21 +9,43 @@ const server = http.createServer(app);
 const io = new socketio.Server(server);
 
 const connectedUsers = {};
+const playersOnRooms = {};
 io.on("connection", (socket) => {
   const { user_id } = socket.handshake.query;
   connectedUsers[user_id] = socket.id;
 
   socket.on("newRoom", (room_id) => {
     socket.join(`room${room_id}`);
-    socket.to(`room${room_id}`).emit("joinRoom");
+
+    // if (
+    //   Array.isArray(
+    //     playersOnRooms[room_id] && playersOnRooms[room_id].length > 0
+    //   )
+    // ) {
+    //   if (!playersOnRooms[room_id].includes(user_id)) {
+    //     const newRoomMembers = playersOnRooms[room_id].push(user_id);
+    //     playersOnRooms[room_id] = newRoomMembers;
+    //   }
+    // } else {
+    //   playersOnRooms[room_id] = [user_id];
+    // }
+
+    // socket.to(`room${room_id}`).emit("joinRoom", playersOnRooms);
   });
 
   socket.on("leaveRoom", (room_id) => {
+    // const newRoomMembers = playersOnRooms[room_id].filter(
+    //   (user) => user !== user_id
+    // );
+
+    // playersOnRooms[room_id] = newRoomMembers;
+    // socket.to(`room${room_id}`).emit("leaveRoom", playersOnRooms[room_id]);
     socket.leave(`room${room_id}`);
   });
 
-  socket.on("newMsg", (data) => {
-    socket.to(`room${data.room_id}`).emit("newMsg", data);
+  socket.on("update", (data) => {
+    // console.log("recebi", JSON.stringify(data));
+    socket.to(`room${data.room_id}`).emit("update", data);
   });
 
   socket.on("disconnect", async () => {
