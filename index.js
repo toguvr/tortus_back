@@ -13,33 +13,35 @@ const playersOnRooms = {};
 io.on("connection", (socket) => {
   const { user_id } = socket.handshake.query;
   connectedUsers[user_id] = socket.id;
-
   socket.on("newRoom", (room_id) => {
     socket.join(`room${room_id}`);
 
-    // if (
-    //   Array.isArray(
-    //     playersOnRooms[room_id] && playersOnRooms[room_id].length > 0
-    //   )
-    // ) {
-    //   if (!playersOnRooms[room_id].includes(user_id)) {
-    //     const newRoomMembers = playersOnRooms[room_id].push(user_id);
-    //     playersOnRooms[room_id] = newRoomMembers;
-    //   }
-    // } else {
-    //   playersOnRooms[room_id] = [user_id];
-    // }
-
-    // socket.to(`room${room_id}`).emit("joinRoom", playersOnRooms);
+    if (!playersOnRooms[room_id]) {
+      playersOnRooms[room_id] = [user_id];
+      return socket
+        .to(`room${room_id}`)
+        .emit("joinRoom", playersOnRooms[room_id]);
+    } else {
+      if (!playersOnRooms[room_id].includes(user_id)) {
+        playersOnRooms[room_id] = [...playersOnRooms[room_id], user_id];
+        return socket
+          .to(`room${room_id}`)
+          .emit("joinRoom", playersOnRooms[room_id]);
+      } else {
+        return socket
+          .to(`room${room_id}`)
+          .emit("joinRoom", playersOnRooms[room_id]);
+      }
+    }
   });
 
   socket.on("leaveRoom", (room_id) => {
-    // const newRoomMembers = playersOnRooms[room_id].filter(
-    //   (user) => user !== user_id
-    // );
+    const newRoomMembers = playersOnRooms[room_id].filter(
+      (user) => user !== user_id
+    );
 
-    // playersOnRooms[room_id] = newRoomMembers;
-    // socket.to(`room${room_id}`).emit("leaveRoom", playersOnRooms[room_id]);
+    playersOnRooms[room_id] = newRoomMembers;
+    socket.to(`room${room_id}`).emit("leaveRoom", playersOnRooms[room_id]);
     socket.leave(`room${room_id}`);
   });
 
