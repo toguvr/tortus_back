@@ -65,6 +65,11 @@ app.get("/", (req, res) => {
   res.send("<h1>Hello world</h1>");
 });
 
+app.get("/room/:room_id", (req, res) => {
+  const { room_id } = req.params;
+  res.status(200).json({ room: playersOnRooms[room_id] });
+});
+
 server.listen(process.env.PORT || 3333, () => {
   console.log("listening on *:" + process.env.PORT);
 });
