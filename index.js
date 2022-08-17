@@ -65,8 +65,15 @@ app.get("/", (req, res) => {
   res.send("<h1>Hello world</h1>");
 });
 
-app.get("/room/:room_id", (req, res) => {
-  const { room_id } = req.params;
+app.get("/room/:room_id/user/:user_id", (req, res) => {
+  const { room_id, user_id } = req.params;
+  if (!playersOnRooms[room_id]) {
+    return (playersOnRooms[room_id] = [user_id]);
+  } else {
+    if (!playersOnRooms[room_id].includes(user_id)) {
+      return (playersOnRooms[room_id] = [...playersOnRooms[room_id], user_id]);
+    }
+  }
   res.status(200).json({ room: playersOnRooms[room_id] });
 });
 
